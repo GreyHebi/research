@@ -3,17 +3,13 @@ package ru.hebi.research.mapping;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-@BenchmarkMode({Mode.AverageTime})
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
 @State(Scope.Benchmark)
-@Warmup(iterations = 3, time = 5)
-@Measurement(iterations = 8, time = 10)
 public class MapBenchmark {
 
     @Param({"10", "100", "1000", "10000", "1000000"})
@@ -43,7 +39,7 @@ public class MapBenchmark {
 
     @Benchmark
     public void forEach() {
-        List<Second> r = new ArrayList<>(data.size());
+        final List<Second> r = new ArrayList<>(data.size());
 
         for (First in : data) {
             r.add(mapping.apply(in));
@@ -61,12 +57,12 @@ public class MapBenchmark {
         while (iterator.hasNext()) {
             r[cursor++] = mapping.apply(iterator.next());
         }
-        result = List.of(r);
+        result = Arrays.asList(r);
     }
 
     @Benchmark
     public void iterator_toList() {
-        List<Second> r = new ArrayList<>(data.size());
+        final List<Second> r = new ArrayList<>(data.size());
         final Iterator<First> iterator = data.iterator();
 
         while (iterator.hasNext()) {
