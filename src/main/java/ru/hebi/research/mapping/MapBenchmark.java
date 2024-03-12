@@ -1,6 +1,7 @@
 package ru.hebi.research.mapping;
 
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,6 @@ public class MapBenchmark {
 
     private Function<First, Second> mapping;
     private List<First> data;
-    private List<Second> result;
 
     @Setup
     public void setup() {
@@ -31,24 +31,26 @@ public class MapBenchmark {
     }
 
     @Benchmark
-    public void stream() {
-        result = data.stream()
-                .map(mapping)
-                .toList();
+    public void stream(Blackhole bh) {
+        bh.consume(
+                data.stream()
+                        .map(mapping)
+                        .toList()
+        );
     }
 
     @Benchmark
-    public void forEach() {
+    public void forEach(Blackhole bh) {
         final List<Second> r = new ArrayList<>(data.size());
 
         for (First in : data) {
             r.add(mapping.apply(in));
         }
-        result = r;
+        bh.consume(r);
     }
 
     @Benchmark
-    public void iterator_toArray() {
+    public void iterator_toArray(Blackhole bh) {
         final int size = data.size();
         final Second[] r = new Second[size];
 
@@ -57,18 +59,18 @@ public class MapBenchmark {
         while (iterator.hasNext()) {
             r[cursor++] = mapping.apply(iterator.next());
         }
-        result = Arrays.asList(r);
+        bh.consume(Arrays.asList(r));
     }
 
     @Benchmark
-    public void iterator_toList() {
+    public void iterator_toList(Blackhole bh) {
         final List<Second> r = new ArrayList<>(data.size());
         final Iterator<First> iterator = data.iterator();
 
         while (iterator.hasNext()) {
             r.add(mapping.apply(iterator.next()));
         }
-        result = r;
+        bh.consume(r);
     }
 
 }
